@@ -1,0 +1,217 @@
+// Question 1
+#include <stdio.h>
+#include <stdlib.h>
+int** allocateMatrix(int rows, int cols) {
+int** matrix = (int**)malloc(rows * sizeof(int*));
+for (int i = 0; i < rows; i++) {
+matrix[i] = (int*)malloc(cols * sizeof(int));
+}
+return matrix;
+}
+void inputMatrix(int** matrix, int rows, int cols) {
+printf("Enter the elements of the matrix (%d x %d):\n", rows, cols);
+for (int i = 0; i < rows; i++) {
+for (int j = 0; j < cols; j++) {
+scanf("%d", &matrix[i][j]);
+}
+}
+}
+int** multiplyMatrices(int** mat1, int** mat2, int r1, int c1, int c2) {
+int** result = allocateMatrix(r1, c2);
+for (int i = 0; i < r1; i++) {
+for (int j = 0; j < c2; j++) {
+result[i][j] = 0;
+for (int k = 0; k < c1; k++) {
+result[i][j] += mat1[i][k] * mat2[k][j];
+}
+}
+}
+return result;
+}
+void displayMatrix(int** matrix, int rows, int cols) {
+printf("Matrix (%d x %d):\n", rows, cols);
+for (int i = 0; i < rows; i++) {
+for (int j = 0; j < cols; j++) {
+printf("%d ", matrix[i][j]);
+}
+printf("\n");
+}
+}
+void freeMatrix(int** matrix, int rows) {
+for (int i = 0; i < rows; i++) {
+free(matrix[i]);
+}
+free(matrix);
+}
+int main() {
+int r1, c1, r2, c2;
+printf("Enter the number of rows and columns for the first matrix: ");
+scanf("%d %d", &r1, &c1);
+printf("Enter the number of rows and columns for the second matrix: ");
+scanf("%d %d", &r2, &c2);
+if (c1 != r2) {
+printf("Matrix multiplication not possible with these dimensions.\n");
+return -1;
+}
+int** mat1 = allocateMatrix(r1, c1);
+int** mat2 = allocateMatrix(r2, c2);
+inputMatrix(mat1, r1, c1);
+inputMatrix(mat2, r2, c2);
+int** result = multiplyMatrices(mat1, mat2, r1, c1, c2);
+displayMatrix(result, r1, c2);
+freeMatrix(mat1, r1);
+freeMatrix(mat2, r2);
+freeMatrix(result, r1);
+return 0;
+}
+
+
+
+// Question 2
+#include <stdio.h>
+#include <string.h>
+#define MAX 100
+#define NAME_LENGTH 50
+int total_students = 0;
+void createList(char students[][NAME_LENGTH]) {
+int n;
+printf("Enter the number of students to add: ");
+scanf("%d", &n);
+getchar(); 
+for (int i = 0; i < n; i++) {
+printf("Enter student name %d: ", i + 1);
+fgets(students[total_students], NAME_LENGTH, stdin);
+students[total_students][strcspn(students[total_students], "\n")] = '\0'; 
+total_students++;
+}
+}
+void insertStudent(char students[][NAME_LENGTH]) {
+if (total_students >= MAX) {
+printf("The list is full!\n");
+return;
+}
+int position;
+char name[NAME_LENGTH];
+printf("Enter the name of the new student: ");
+getchar(); 
+fgets(name, NAME_LENGTH, stdin);
+name[strcspn(name, "\n")] = '\0'; 
+printf("Enter the position (0 to %d) to insert the student: ", total_students);
+scanf("%d", &position);
+if (position < 0 || position > total_students) {
+printf("Invalid position!\n");
+return;
+}
+for (int i = total_students; i > position; i--) {
+strcpy(students[i], students[i - 1]);
+}
+strcpy(students[position], name);
+total_students++;
+}
+void deleteStudent(char students[][NAME_LENGTH]) {
+int choice;
+printf("Delete by (1) Index or (2) Name? ");
+scanf("%d", &choice);
+if (choice == 1) {
+int index;
+printf("Enter the index of the student to delete (0 to %d): ",total_students-1);
+scanf("%d", &index);
+if (index < 0 || index >= total_students) {
+printf("Invalid index!\n");
+return;
+}
+for (int i = index; i < total_students - 1; i++) {
+strcpy(students[i], students[i + 1]);
+}
+total_students--;
+} 
+else if (choice == 2) {
+char name[NAME_LENGTH];
+printf("Enter the name of the student to delete: ");
+getchar(); 
+fgets(name, NAME_LENGTH, stdin);
+name[strcspn(name, "\n")] = '\0'; 
+int found = 0;
+for (int i = 0; i < total_students; i++) {
+if (strcmp(students[i], name) == 0) {
+for (int j = i; j < total_students - 1; j++) {
+strcpy(students[j], students[j + 1]);
+}
+total_students--;
+found = 1;
+break;
+}
+}
+if (!found) {
+printf("Student not found!\n");
+}
+} else {
+printf("Invalid choice!\n");
+}
+}
+void traverseList(char students[][NAME_LENGTH]) {
+if (total_students == 0) {
+printf("The list is empty!\n");
+} else {
+printf("List of students:\n");
+for (int i = 0; i < total_students; i++) {
+printf("%d. %s\n", i + 1, students[i]);
+}
+}
+}
+void searchStudent(char students[][NAME_LENGTH]) {
+char name[NAME_LENGTH];
+printf("Enter the name of the student to search: ");
+getchar(); 
+fgets(name, NAME_LENGTH, stdin);
+name[strcspn(name, "\n")] = '\0'; 
+int found = 0;
+for (int i = 0; i < total_students; i++) {
+if (strcmp(students[i], name) == 0) {
+printf("Student '%s' found at position %d.\n", name, i + 1);
+found = 1;
+break;
+}
+}
+if (!found) {
+printf("Student not found!\n");
+}
+}
+int main() {
+char students[MAX][NAME_LENGTH];
+int choice;
+while (1) {
+printf("\nStudent Management System\n");
+printf("1. Create List\n");
+printf("2. Insert Student\n");
+printf("3. Delete Student\n");
+printf("4. Traverse List\n");
+printf("5. Search for Student\n");
+printf("6. Exit\n");
+printf("Enter your choice: ");
+scanf("%d", &choice);
+switch (choice) {
+case 1:
+createList(students);
+break;
+case 2:
+insertStudent(students);
+break;
+case 3:
+deleteStudent(students);
+break;
+case 4:
+traverseList(students);
+break;
+case 5:
+searchStudent(students);
+break;
+case 6:
+printf("Exiting...\n");
+return 0;
+default:
+printf("Invalid choice! Please try again.\n");
+}
+}
+return 0;
+}
